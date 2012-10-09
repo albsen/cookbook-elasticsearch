@@ -44,8 +44,9 @@ template "/etc/init.d/elasticsearch" do
 end
 service "elasticsearch" do
   supports :status => true, :restart => true
-  action :start
+  action [:enable]
 end
+
 
 # Increase open file limits
 #
@@ -86,8 +87,8 @@ bash "Move elasticsearch to #{node.elasticsearch[:dir]}/#{elasticsearch}" do
   cwd  "/tmp"
 
   code <<-EOS
-    tar xfz /tmp/#{elasticsearch}.tar.gz
-    mv --force /tmp/#{elasticsearch} #{node.elasticsearch[:dir]}
+    tar xfz #{node.elasticsearch[:tmp_dir]}/#{elasticsearch}.tar.gz
+    cp -r /tmp/#{elasticsearch} #{node.elasticsearch[:dir]}
   EOS
 
   creates "#{node.elasticsearch[:dir]}/#{elasticsearch}/lib/#{elasticsearch}.jar"
@@ -141,6 +142,14 @@ link "#{node.elasticsearch[:dir]}/elasticsearch" do
 end
 
 install_plugin "mobz/elasticsearch-head"
+
+
+script "really_start_elasticsearch" do
+  interpreter "bash"
+  code <<-EOH
+  /etc/init.d/elasticsearch start
+  EOH
+end
 
 # Add Monit configuration file
 #
