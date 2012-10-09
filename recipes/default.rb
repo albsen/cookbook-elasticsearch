@@ -30,7 +30,7 @@ end
 #
 %w| conf_path data_path log_path pid_path |.each do |path|
   directory node.elasticsearch[path.to_sym] do
-    owner node.elasticsearch[:user] and group node.elasticsearch[:user] and mode 0755
+    #owner node.elasticsearch[:user] and group node.elasticsearch[:user] and mode 0755
     recursive true
     action :create
   end
@@ -44,7 +44,7 @@ template "/etc/init.d/elasticsearch" do
 end
 service "elasticsearch" do
   supports :status => true, :restart => true
-  action [ :enable ]
+  action :start
 end
 
 # Increase open file limits
@@ -72,7 +72,9 @@ end
 
 # Download ES
 #
-remote_file "/tmp/elasticsearch-#{node.elasticsearch[:version]}.tar.gz" do
+#
+
+remote_file "#{node.elasticsearch[:tmp_dir]}/elasticsearch-#{node.elasticsearch[:version]}.tar.gz" do
   source "https://github.com/downloads/elasticsearch/elasticsearch/#{elasticsearch}.tar.gz"
   action :create_if_missing
 end
@@ -137,6 +139,8 @@ link "#{node.elasticsearch[:dir]}/elasticsearch" do
   owner node.elasticsearch[:user] and group node.elasticsearch[:user]
   to    "#{node.elasticsearch[:dir]}/#{elasticsearch}"
 end
+
+install_plugin "mobz/elasticsearch-head"
 
 # Add Monit configuration file
 #
