@@ -26,6 +26,15 @@ bash "remove the elasticsearch user home" do
   only_if "test -d #{node.elasticsearch[:dir]}/elasticsearch"
 end
 
+if node.elasticsearch[:mode] == "vagrant"
+  # because we are persisting ES data, somethings need to be removed to not break stuff on startup
+  bash "removing the elasticsearch pid on startup" do
+    user 'root'
+    code "rm -rf #{node.elasticsearch[:pid_path]}/#{node.elasticsearch[:node_name].to_s.gsub(/\W/, '_')}.pid"
+    only_if "test -e #{node.elasticsearch[:pid_path]}/#{node.elasticsearch[:node_name].to_s.gsub(/\W/, '_')}.pid"
+  end
+end
+
 # Create ES directories
 #
 %w| conf_path data_path log_path pid_path |.each do |path|
