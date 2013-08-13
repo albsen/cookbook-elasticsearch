@@ -85,7 +85,7 @@ end
 #
 
 remote_file "#{node.elasticsearch[:tmp_dir]}/elasticsearch-#{node.elasticsearch[:version]}.tar.gz" do
-  source "https://github.com/downloads/elasticsearch/elasticsearch/#{elasticsearch}.tar.gz"
+  source node.elasticsearch[:download_url]
   action :create_if_missing
 end
 
